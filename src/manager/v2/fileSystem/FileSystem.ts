@@ -611,7 +611,8 @@ export abstract class FileSystem implements ISerializableFileSystem
      * @param callback Returns the stream.
      */
     openWriteStream(ctx : RequestContext, path : Path | string, mode : OpenWriteStreamMode, targetSource : boolean, estimatedSize : number, callback : Return2Callback<Writable, boolean>) : void
-    openWriteStream(ctx : RequestContext, _path : Path | string, _mode : OpenWriteStreamMode | boolean | number | Return2Callback<Writable, boolean>, _targetSource ?: boolean | number | Return2Callback<Writable, boolean>, _estimatedSize ?: number | Return2Callback<Writable, boolean>, _callback ?: Return2Callback<Writable, boolean>) : void
+    openWriteStream(ctx : RequestContext, path : Path | string, mode : OpenWriteStreamMode, targetSource : boolean, estimatedSize : number, callback : Return2Callback<Writable, boolean>, callbackComplete : SimpleCallback) : void
+    openWriteStream(ctx : RequestContext, _path : Path | string, _mode : OpenWriteStreamMode | boolean | number | Return2Callback<Writable, boolean>, _targetSource ?: boolean | number | Return2Callback<Writable, boolean>, _estimatedSize ?: number | Return2Callback<Writable, boolean>, _callback ?: Return2Callback<Writable, boolean>, _callbackComplete?: SimpleCallback) : void
     {
         let targetSource = false;
         for(const obj of [ _mode, _targetSource ])
@@ -655,7 +656,7 @@ export abstract class FileSystem implements ISerializableFileSystem
                         estimatedSize,
                         targetSource,
                         mode
-                    }, (e, wStream) => callback(e, wStream, created));
+                    }, (e, wStream) => callback(e, wStream, created), _callbackComplete);
                 }
                 const go = (callback : Return2Callback<Writable, boolean>) =>
                 {
@@ -748,7 +749,7 @@ export abstract class FileSystem implements ISerializableFileSystem
             })
         })
     }
-    protected _openWriteStream?(path : Path, ctx : OpenWriteStreamInfo, callback : ReturnCallback<Writable>) : void
+    protected _openWriteStream?(path : Path, ctx : OpenWriteStreamInfo, callback : ReturnCallback<Writable>, callbackComplete: SimpleCallback) : void
     
     /**
      * Open a stream to read the content of the resource.
@@ -2027,9 +2028,13 @@ export abstract class FileSystem implements ISerializableFileSystem
                 .each(Object.keys(tree), (name, cb) => {
                     const value = tree[name];
                     const childPath = rootPath.getChildPath(name);
-                    if(value.constructor === ResourceType || value.constructor === String || value.constructor === Buffer)
+                    if(value.constructor === ResourceType || value.constructor === Buffer)
                     {
                         this.addSubTree(ctx, childPath, value, cb)
+                    }
+                    else if(value.constructor === String)
+                    {
+                        this.addSubTree(ctx, childPath, value as string, cb)
                     }
                     else
                     {
