@@ -18,6 +18,7 @@ import * as https from 'https'
 import * as http from 'http'
 import { promisifyCall } from '../../../helper/v2/promise'
 import { SerializedData, FileSystemSerializer } from '../../../manager/v2/export'
+import * as LOG from '../../../helper/v2/logger';
 
 export type WebDAVServerStartCallback = (server ?: http.Server) => void;
 
@@ -45,6 +46,8 @@ export class WebDAVServer
 
     constructor(options ?: WebDAVServerOptions)
     {
+        LOG.info('WebDAVServer.constructor');
+
         this.beforeManagers = [];
         this.afterManagers = [];
         this.methods = {};

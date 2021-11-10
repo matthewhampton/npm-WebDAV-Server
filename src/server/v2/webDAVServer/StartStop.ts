@@ -1,6 +1,7 @@
 import { HTTPCodes, HTTPRequestContext, HTTPMethod } from '../WebDAVRequest'
 import { WebDAVServerStartCallback } from './WebDAVServer'
 import { Errors } from '../../../Errors'
+import * as LOG from '../../../helper/v2/logger';
 import * as https from 'https'
 import * as http from 'http'
 
@@ -23,6 +24,7 @@ export function executeRequest(req : http.IncomingMessage, res : http.ServerResp
 
         base.exit = () =>
         {
+            LOG.info(`StartStop executeRequest exit ${req.method}`);
             base.response.end();
             this.invokeAfterRequest(base, null);
         };
@@ -58,6 +60,10 @@ export function executeRequest(req : http.IncomingMessage, res : http.ServerResp
         }
         else
         {
+            LOG.info(`StartStop executeRequest ${req.method}`);
+            // if (req.method.toLowerCase() === 'put')
+            //     LOG.info(`StartStop executeRequest PUT has body ${JSON.stringify(req['body'])}`, LOG.LS.eHTTP);
+
             this.invokeBeforeRequest(base, () => {
                 method.chunked(base, req, base.exit);
             })

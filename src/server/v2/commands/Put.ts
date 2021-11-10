@@ -2,6 +2,7 @@ import { HTTPCodes, HTTPMethod, HTTPRequestContext } from '../WebDAVRequest'
 import { ResourceType, OpenWriteStreamMode } from '../../../manager/v2/fileSystem/CommonTypes'
 import { Readable } from 'stream'
 import { Errors } from '../../../Errors'
+import * as LOG from '../../../helper/v2/logger';
 
 export default class implements HTTPMethod
 {
@@ -13,6 +14,7 @@ export default class implements HTTPMethod
     chunked(ctx : HTTPRequestContext, inputStream : Readable, callback : () => void)
     {
         const targetSource = ctx.headers.isSource;
+        // LOG.info('PUT chunked START');
 
         ctx.getResource((e, r) => {
             ctx.checkIfHeader(r, () => {
@@ -35,7 +37,9 @@ export default class implements HTTPMethod
                             return callback();
                         }
 
+                        // LOG.info('PUT.chunked openWriteStream BEFORE');
                         r.openWriteStream(mode, targetSource, ctx.headers.contentLength, (e, wStream, created) => {
+                            // LOG.info('PUT.chunked openWriteStream STARTED');
                             if(e)
                             {
                                 if(!ctx.setCodeFromError(e))
@@ -43,20 +47,23 @@ export default class implements HTTPMethod
                                 return callback();
                             }
 
+                            // LOG.info('PUT.chunked inputStream.pipe(wStream) BEFORE');
                             inputStream.pipe(wStream);
                             wStream.on('finish', (e) => {
-                                if(created)
-                                    ctx.setCode(HTTPCodes.Created);
-                                else
-                                    ctx.setCode(HTTPCodes.OK);
-                                //ctx.invokeEvent('write', r);
-                                callback();
+                                LOG.info('PUT.chunked wStream onFinish');
                             });
                             wStream.on('error', (e) => {
                                 if(!ctx.setCodeFromError(e))
                                     ctx.setCode(HTTPCodes.InternalServerError)
                                 callback();
                             });
+                        }, (e) => {
+                            LOG.info('PUT.chunked callbackComplete');
+                            if(e)
+                                ctx.setCode(HTTPCodes.InternalServerError);
+                            else
+                                ctx.setCode(HTTPCodes.OK);
+                            callback();
                         })
                     }))
                 //})
