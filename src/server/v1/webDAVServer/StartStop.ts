@@ -52,7 +52,7 @@ function autoSave(options : IAutoSave)
                                     outputStream = stream;
                                 outputStream.pipe(fs.createWriteStream(options.tempTreeFilePath));
 
-                                stream.end(JSON.stringify(data), (e) => {
+                                stream.end(JSON.stringify(data), () => {
                                     if(e)
                                     {
                                         options.onSaveError(e);

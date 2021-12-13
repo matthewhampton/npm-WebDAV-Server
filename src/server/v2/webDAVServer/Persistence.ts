@@ -113,7 +113,7 @@ export class AutoSavePool
                     const fileStream = fs.createWriteStream(this.options.tempTreeFilePath);
                     outputStream.pipe(fileStream);
     
-                    inputStream.end(JSON.stringify(data), (e) => {
+                    inputStream.end(JSON.stringify(data), () => {
                         if(e)
                         {
                             this.options.onSaveError(e);
