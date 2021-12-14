@@ -676,13 +676,13 @@ export abstract class FileSystem implements ISerializableFileSystem
                                             return callback(e, wStream, created);
 
                                         const stream = new Transform({
-                                            transform(chunk, encoding, callback)
+                                            transform(chunk, _encoding, callback)
                                             {
                                                 nb += chunk.length;
                                                 if(nb > available)
                                                     callback(Errors.InsufficientStorage);
                                                 else
-                                                    callback(null, chunk, encoding);
+                                                    callback(null, chunk);
                                             }
                                         });
                                         stream.pipe(wStream);

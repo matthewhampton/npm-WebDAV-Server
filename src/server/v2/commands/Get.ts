@@ -60,16 +60,16 @@ class MultipleRangedStream extends Transform
         });
     }
 
-    _transform(chunk : string | Buffer, encoding : string, callback : Function)
+    _transform(chunk : string | Buffer, _encoding : string, callback : Function)
     {
         this.streams.forEach((streamRange) => {
-            streamRange.stream.write(chunk, encoding);
+            streamRange.stream.write(chunk);
         });
 
         callback(null, Buffer.alloc(0));
     }
 
-    end(chunk ?: any, encoding?: any, cb?: Function): void
+    end(chunk ?: any, encoding?: any, cb?: () => void): void
     {
         if(this.onEnded)
             process.nextTick(() => this.onEnded());

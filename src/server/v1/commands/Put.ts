@@ -103,7 +103,7 @@ export default function unchunkedMethod(arg : MethodCallArgs, callback)
                                 return;
                             }
 
-                            stream.end(arg.data, (e) => {
+                            stream.end(arg.data, () => {
                                 if(e)
                                     arg.setCode(HTTPCodes.InternalServerError)
                                 else
@@ -141,7 +141,7 @@ export default function unchunkedMethod(arg : MethodCallArgs, callback)
                                 return;
                             }
 
-                            stream.end(arg.data, (e) => {
+                            stream.end(arg.data, () => {
                                 if(e)
                                     arg.setCode(HTTPCodes.InternalServerError)
                                 else
