@@ -54,7 +54,7 @@
     "safe-regex": "^2.1.1",
     "tslint": "^6.1.3",
     "typescript": "^4.2.3",
-    "webdav-fs": "^4.0.1",
+    "webdav-fs": "https://github.com/Smithsonian/webdav-fs.git",
     "xml-js": "^1.6.11"
   },
   "types": "./lib/index.d.ts"
