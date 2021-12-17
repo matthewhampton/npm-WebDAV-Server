@@ -30,12 +30,12 @@
     "build-test": "cd test/v2/tests.ts && tsc"
   },
   "name": "webdav-server",
-  "version": "2.6.2",
+  "version": "2.7.0",
   "author": "Adrien Castex <adrien.castex@protonmail.com>",
   "license": "Unlicense",
   "repository": {
     "type": "git",
-    "url": "https://github.com/OpenMarshal/npm-WebDAV-Server.git"
+    "url": "https://github.com/Smithsonian/npm-WebDAV-Server.git"
   },
   "description": "WebDAV Server",
   "dependencies": {
