@@ -21,11 +21,11 @@
     "virtual"
   ],
   "scripts": {
-    "prepare": "npm run build",
+    "prepare": "yarn build",
     "dev": "cd src && tsc --declaration -w",
     "build": "cd src && tsc --declaration",
     "lint": "tslint --project tslint.json src/**/v2/**/*.ts",
-    "test": "npm run build-test && npm run start-test",
+    "test": "yarn build-test && yarn start-test",
     "start-test": "node test/v2/root.js && node test/v1/root.js",
     "build-test": "cd test/v2/tests.ts && tsc"
   },
