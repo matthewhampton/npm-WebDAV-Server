@@ -69,7 +69,7 @@ class MultipleRangedStream extends Transform
         callback(null, Buffer.alloc(0));
     }
 
-    end(chunk ?: any, encoding?: any, cb?: () => void): void
+    end(chunk ?: any, encoding?: any, cb?: (error?: Error | null, data?: any) => void): void
     {
         if(this.onEnded)
             process.nextTick(() => this.onEnded());
