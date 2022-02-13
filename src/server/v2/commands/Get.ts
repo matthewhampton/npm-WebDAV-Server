@@ -45,8 +45,8 @@ class RangedStream extends Transform
 
 class MultipleRangedStream extends Transform
 {
-    streams : { stream : RangedStream, range : IRange }[]
-    onEnded : () => void
+    streams : { stream : RangedStream, range : IRange }[];
+    onEnded : () => void;
 
     constructor(public ranges : IRange[])
     {
@@ -69,19 +69,18 @@ class MultipleRangedStream extends Transform
         callback(null, Buffer.alloc(0));
     }
 
-    end(arg1?: any | (() => void), arg2?: BufferEncoding | (() => void), arg3?: () => void): void
+    end(arg1?: any | (() => void), arg2?: BufferEncoding | (() => void), arg3?: () => void): this
     {
         if (this.onEnded)
             process.nextTick(() => this.onEnded());
 
         if (typeof arg1 === 'function')
             super.end(arg1);
-    
-        if (typeof arg2 === 'function')
+        else if (typeof arg2 === 'function')
             super.end(arg1, arg2);
-    
-        if (typeof arg2 === 'string')
+        else if (typeof arg2 === 'string')
             super.end(arg1, arg2, arg3);
+        return this;
     }
 }
 
