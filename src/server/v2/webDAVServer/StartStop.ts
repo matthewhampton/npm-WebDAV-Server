@@ -24,7 +24,7 @@ export function executeRequest(req : http.IncomingMessage, res : http.ServerResp
 
         base.exit = () =>
         {
-            LOG.info(`StartStop executeRequest exit ${req.method}`);
+            LOG.info(`StartStop executeRequest exit ${req.method} ${req.url}`);
             base.response.end();
             this.invokeAfterRequest(base, null);
         };
@@ -60,9 +60,9 @@ export function executeRequest(req : http.IncomingMessage, res : http.ServerResp
         }
         else
         {
-            LOG.info(`StartStop executeRequest ${req.method}`);
+            LOG.info(`StartStop executeRequest ${req.method} ${req.url}`);
             // if (req.method.toLowerCase() === 'put')
-            //     LOG.info(`StartStop executeRequest PUT has body ${JSON.stringify(req['body'])}`, LOG.LS.eHTTP);
+            //     LOG.info(`StartStop executeRequest PUT has body ${JSON.stringify(req['body'])}`);
 
             this.invokeBeforeRequest(base, () => {
                 method.chunked(base, req, base.exit);
