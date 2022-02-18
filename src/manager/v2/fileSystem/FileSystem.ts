@@ -49,6 +49,7 @@ import { Lock } from '../../../resource/v2/lock/Lock'
 import { Path } from '../Path'
 import * as crypto from 'crypto'
 import { ensureValue, promisifyCall } from '../../../helper/v2/promise'
+// import * as LOG from '../../../helper/v2/logger';
 
 class BufferedIsLocked
 {
@@ -614,6 +615,7 @@ export abstract class FileSystem implements ISerializableFileSystem
     openWriteStream(ctx : RequestContext, path : Path | string, mode : OpenWriteStreamMode, targetSource : boolean, estimatedSize : number, callback : Return2Callback<Writable, boolean>, callbackComplete : SimpleCallback) : void
     openWriteStream(ctx : RequestContext, _path : Path | string, _mode : OpenWriteStreamMode | boolean | number | Return2Callback<Writable, boolean>, _targetSource ?: boolean | number | Return2Callback<Writable, boolean>, _estimatedSize ?: number | Return2Callback<Writable, boolean>, _callback ?: Return2Callback<Writable, boolean>, _callbackComplete?: SimpleCallback) : void
     {
+        // LOG.info(`FileSystem.openWriteStream ${ctx.requested.uri} START`);
         let targetSource = false;
         for(const obj of [ _mode, _targetSource ])
             if(obj && obj.constructor === Boolean)
@@ -646,32 +648,39 @@ export abstract class FileSystem implements ISerializableFileSystem
         
         issuePrivilegeCheck(this, ctx, path, targetSource ? 'canWriteContentSource' : 'canWriteContentTranslated', callback, () => {
             this.isLocked(ctx, path, (e, isLocked) => {
+                // LOG.info(`FileSystem.openWriteStream ${ctx.requested.uri} issuePrivilegeCheck isLocked START e=${JSON.stringify(e)}`);
                 if(e || isLocked)
                     return callback(e ? e : Errors.Locked);
                 
                 const finalGo = (callback : Return2Callback<Writable, boolean>) =>
                 {
+                    // LOG.info(`FileSystem.openWriteStream ${ctx.requested.uri} finalGo BEFORE _openWriteStream`);
                     this._openWriteStream(path, {
                         context: ctx,
                         estimatedSize,
                         targetSource,
                         mode
                     }, (e, wStream) => callback(e, wStream, created), _callbackComplete);
+                    // LOG.info(`FileSystem.openWriteStream ${ctx.requested.uri} finalGo AFTER _openWriteStream`);
                 }
                 const go = (callback : Return2Callback<Writable, boolean>) =>
                 {
+                    // LOG.info(`FileSystem.openWriteStream ${ctx.requested.uri} go START`);
                     this.size(ctx, path, true, (e, size) => {
                         ctx.server.options.storageManager.evaluateContent(ctx, this, size, (sizeStored) => {
                             if(estimatedSize === undefined || estimatedSize === null || estimatedSize.constructor === Number && estimatedSize <= 0)
                             {
                                 ctx.server.options.storageManager.available(ctx, this, (available) => {
+                                    // LOG.info(`FileSystem.openWriteStream ${ctx.requested.uri} go size evaluateContext Est = ${estimatedSize} Avail = ${available}`);
                                     if(available === -1)
                                         return finalGo(callback);
                                     if(available === 0)
                                         return callback(Errors.InsufficientStorage);
 
                                     let nb = 0;
+                                    // LOG.info(`FileSystem.openWriteStream ${ctx.requested.uri} go BEFORE finalGo`);
                                     finalGo((e, wStream, created) => {
+                                        // LOG.info(`FileSystem.openWriteStream ${ctx.requested.uri} finalGo START`);
                                         if(e)
                                             return callback(e, wStream, created);
 
@@ -685,21 +694,26 @@ export abstract class FileSystem implements ISerializableFileSystem
                                                     callback(null, chunk);
                                             }
                                         });
+                                        // LOG.info(`FileSystem.openWriteStream ${ctx.requested.uri} finalGo BEFORE pipe`);
                                         stream.pipe(wStream);
                                         stream.on('finish', () => {
+                                            // LOG.info(`FileSystem.openWriteStream ${ctx.requested.uri} finalGo onFinish`);
                                             ctx.server.options.storageManager.reserve(ctx, this, nb, (reserved) => {
                                                 if(!reserved)
                                                     stream.emit('error', Errors.InsufficientStorage);
                                             })
                                         })
+                                        // LOG.info(`FileSystem.openWriteStream ${ctx.requested.uri} finalGo BEFORE callback`);
                                         callback(e, stream, created);
                                     })
                                 })
                             }
                             else
                             {
+                                // LOG.info(`FileSystem.openWriteStream ${ctx.requested.uri} go size evaluateContext Est = ${estimatedSize} Branch2`);
                                 ctx.server.options.storageManager.evaluateContent(ctx, this, estimatedSize, (estimatedSizeStored) => {
                                 ctx.server.options.storageManager.reserve(ctx, this, estimatedSizeStored - sizeStored, (reserved) => {
+                                    // LOG.info(`FileSystem.openWriteStream ${ctx.requested.uri} go size evaluateContext Est = ${estimatedSize} stored = ${sizeStored} res ${reserved}`);
                                     if(!reserved)
                                         return callback(Errors.InsufficientStorage);
                                     finalGo(callback);
@@ -712,15 +726,18 @@ export abstract class FileSystem implements ISerializableFileSystem
 
                 const createAndGo = (intermediates : boolean) =>
                 {
+                    // LOG.info(`FileSystem.openWriteStream ${ctx.requested.uri} createAndGo START`);
                     this.create(ctx, path, ResourceType.File, intermediates, (e) => {
                         if(e)
                             return callback(e);
                         
                         created = true;
+                        // LOG.info(`FileSystem.openWriteStream ${ctx.requested.uri} createAndGo create BEFORE go`);
                         go(callback);
                     })
                 }
 
+                // LOG.info(`FileSystem.openWriteStream ${ctx.requested.uri} issuePrivilegeCheck isLocked mode = ${mode}`);
                 switch(mode)
                 {
                     case 'mustExist':

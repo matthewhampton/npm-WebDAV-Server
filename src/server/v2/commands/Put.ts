@@ -14,7 +14,7 @@ export default class implements HTTPMethod
     chunked(ctx : HTTPRequestContext, inputStream : Readable, callback : () => void)
     {
         const targetSource = ctx.headers.isSource;
-        // LOG.info('PUT chunked START');
+        // LOG.info(`PUT.chunked ${ctx.request.url} START `);
 
         ctx.getResource((e, r) => {
             ctx.checkIfHeader(r, () => {
@@ -37,9 +37,29 @@ export default class implements HTTPMethod
                             return callback();
                         }
 
-                        // LOG.info('PUT.chunked openWriteStream BEFORE');
+                        // LOG.info(`PUT.chunked ${ctx.request.url} openWriteStream BEFORE`);
                         r.openWriteStream(mode, targetSource, ctx.headers.contentLength, (e, wStream, created) => {
-                            // LOG.info('PUT.chunked openWriteStream STARTED');
+                            // LOG.info(`PUT.chunked ${ctx.request.url} openWriteStream STARTED`);
+                            wStream.on('finish', (e) => {
+                                LOG.info(`PUT.chunked ${ctx.request.url} wStream onFinish`);
+                            });
+                            wStream.on('error', (e) => {
+                                LOG.info(`PUT.chunked ${ctx.request.url} wStream onError`);
+                                if(!ctx.setCodeFromError(e))
+                                    ctx.setCode(HTTPCodes.InternalServerError)
+                                callback();
+                            });
+                            // wStream.on('pipe', () => { LOG.info(`PUT.chunked ${ctx.request.url} wStream onPipe`); });
+                            // wStream.on('unpipe', () => { LOG.info(`PUT.chunked ${ctx.request.url} wStream onUnPipe`); });
+                            // wStream.on('close', () => { LOG.info(`PUT.chunked ${ctx.request.url} wStream onClose`); });
+                            // wStream.on('drain', () => { LOG.info(`PUT.chunked ${ctx.request.url} wStream onDrain`); });
+                            
+                            // inputStream.on('resume', () => { LOG.info(`PUT.chunked ${ctx.request.url} inputStream onResume`); });
+                            // inputStream.on('pause', () => { LOG.info(`PUT.chunked ${ctx.request.url} inputStream onPause`); });
+                            // inputStream.on('error', () => { LOG.info(`PUT.chunked ${ctx.request.url} inputStream onError`); });
+                            // inputStream.on('end', () => { LOG.info(`PUT.chunked ${ctx.request.url} inputStream onEnd`); });
+                            // inputStream.on('close', () => { LOG.info(`PUT.chunked ${ctx.request.url} inputStream onClose`); });
+                
                             if(e)
                             {
                                 if(!ctx.setCodeFromError(e))
@@ -47,18 +67,11 @@ export default class implements HTTPMethod
                                 return callback();
                             }
 
-                            // LOG.info('PUT.chunked inputStream.pipe(wStream) BEFORE');
+                            // LOG.info(`PUT.chunked ${ctx.request.url} inputStream.pipe(wStream) BEFORE`);
                             inputStream.pipe(wStream);
-                            wStream.on('finish', (e) => {
-                                LOG.info('PUT.chunked wStream onFinish');
-                            });
-                            wStream.on('error', (e) => {
-                                if(!ctx.setCodeFromError(e))
-                                    ctx.setCode(HTTPCodes.InternalServerError)
-                                callback();
-                            });
+                            // LOG.info(`PUT.chunked ${ctx.request.url} inputStream.pipe(wStream) AFTER`);
                         }, (e) => {
-                            LOG.info('PUT.chunked callbackComplete');
+                            LOG.info(`PUT.chunked ${ctx.request.url} callbackComplete`);
                             if(e)
                                 ctx.setCode(HTTPCodes.InternalServerError);
                             else
