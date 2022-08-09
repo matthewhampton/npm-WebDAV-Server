@@ -35,7 +35,7 @@
   "license": "Unlicense",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Smithsonian/npm-WebDAV-Server.git"
+    "url": "https://github.com/matthewhampton/npm-WebDAV-Server.git"
   },
   "description": "WebDAV Server",
   "dependencies": {
@@ -54,7 +54,7 @@
     "safe-regex": "^2.1.1",
     "tslint": "^6.1.3",
     "typescript": "^4.2.3",
-    "webdav-fs": "https://github.com/Smithsonian/webdav-fs.git",
+    "webdav-fs": "^1.10.1",
     "xml-js": "^1.6.11"
   },
   "types": "./lib/index.d.ts"
